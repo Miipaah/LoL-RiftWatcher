@@ -2,6 +2,8 @@ import threading
 import requests
 import urllib3
 import time
+import pyaudio
+import wave
 
 # Define the URLs for the endpoints
 events_url = "https://127.0.0.1:2999/liveclientdata/eventdata"
@@ -57,9 +59,6 @@ def get_game_time():
 timer_thread = threading.Thread(target=get_game_time)
 timer_thread.start()
 
-import pyaudio
-import wave
-import threading
 
 # Global variable to control recording
 recording = False

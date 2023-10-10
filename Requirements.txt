@@ -1,0 +1,6 @@
+threading
+requests
+urllib3
+time
+pyaudio
+wave

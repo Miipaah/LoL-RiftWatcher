@@ -18,22 +18,32 @@ def get_data(endpoint_url):
         print(f"Error: {e}")
         return None
 
+#global vars
 game_time = None
 game_active = False
 start_time = None
+
+
 def get_game_time():
     global game_time
     global game_active
     while True:
-        #print(game_active)
+
+        #reset game time to previous value
         pause_buffer = get_data(game_stats_url)["gameTime"]
         time.sleep(0.25)
         current_game_time = get_data(game_stats_url)["gameTime"]
+        
+        #if game time is returned check if same as last value
         if current_game_time is not None:
+
+            #different value from last  = game progress
             if current_game_time != pause_buffer:
                 game_time = current_game_time
                 game_active = True
             else:
+
+                #same value = game pause
                 game_active= False
 
                 game_time = "Paused"
@@ -42,7 +52,7 @@ def get_game_time():
             print("Could not Retreive GameTime")
         
         
-
+#start Global timer and Pause detection via Threader
 timer_thread = threading.Thread(target=get_game_time)
 timer_thread.start()
 
@@ -57,6 +67,7 @@ def audio_recording():
     global recording
     global start_time
 
+#Wav Audio parameters
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 2
@@ -75,11 +86,13 @@ def audio_recording():
     start_time = get_data(game_stats_url)["gameTime"]
     print(start_time)
 
+#only appends audio chuinks if game is Active (not Paused)
     while recording:
         data = stream.read(CHUNK)
         if game_active:
             frames.append(data)
         else:
+            #skip frames when Active is False
             pass
 
     print("Recording stopped.")
@@ -88,13 +101,16 @@ def audio_recording():
     stream.close()
     audio.terminate()
 
+#gametime recording started is added on as deadAudio for Syncing
     if start_time is not None:
         delay = start_time
         if delay > 0:
             delay_frames = int(delay * RATE)
+            #adds blank chunks containing only timecode data
             blank_frames = b'\x00' * (delay_frames * CHANNELS * 2)  # Silence frames
             frames = [blank_frames] + frames
 
+#generates wav file based on stored frames[]
     wf = wave.open(OUTPUT_FILENAME, 'wb')
     wf.setnchannels(CHANNELS)
     wf.setsampwidth(audio.get_sample_size(FORMAT))
@@ -102,17 +118,19 @@ def audio_recording():
     wf.writeframes(b''.join(frames))  # Convert frames to bytes before writing
     wf.close()
 
+#starts record stream
 def start_recording():
     global recording
     recording = True
     audio_thread = threading.Thread(target=audio_recording)
     audio_thread.start()
 
+#stops record stream
 def stop_recording():
     global recording
     recording = False
 
-
+#Test Loop
 if __name__ == "__main__":
     start_recording()
     

@@ -2,6 +2,7 @@ import threading
 import requests
 import urllib3
 import time
+
 # Define the URLs for the endpoints
 events_url = "https://127.0.0.1:2999/liveclientdata/eventdata"
 game_stats_url = "https://127.0.0.1:2999/liveclientdata/gamestats"

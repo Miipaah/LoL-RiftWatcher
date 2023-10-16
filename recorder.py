@@ -2,8 +2,9 @@ import threading
 import requests
 import urllib3
 import time
-import pyaudio
 import wave
+import pyaudiowpatch as pyaudio
+import numpy as np
 
 # Define the URLs for the endpoints
 events_url = "https://127.0.0.1:2999/liveclientdata/eventdata"
@@ -71,14 +72,48 @@ def audio_recording():
     CHUNK = 1024
     FORMAT = pyaudio.paInt16
     CHANNELS = 2
-    RATE = 44100
+    RATE = 48000
     OUTPUT_FILENAME = "output.wav"
+ 
 
     audio = pyaudio.PyAudio()
 
-    stream = audio.open(format=FORMAT, channels=CHANNELS,
-                        rate=RATE, input=True,
-                        frames_per_buffer=CHUNK)
+    #scan devices for index of Stereo Mix for Desktop Audio (Game Audio)
+
+    loopback_device_index = None
+    for i in range(audio.get_device_count()):
+        device_info = audio.get_device_info_by_index(i)
+        if "loopback" in device_info["name"].lower():
+            loopback_device_index = i
+            break
+
+    if loopback_device_index is None:
+        print("Default WASAPI loopback device not found. Please specify the correct device index.")
+        exit(1)
+    
+
+    #Record Default Microphone Input
+
+    mic_stream = audio.open(
+
+                format=FORMAT, 
+                channels=CHANNELS,
+                rate=RATE, input=True,
+                frames_per_buffer=CHUNK
+
+                )
+    #Record Defualt Stereo Mix: Loopback
+
+    team_stream = audio.open(
+
+                format=FORMAT,
+                channels=CHANNELS,
+                rate=RATE,
+                input=True,
+                input_device_index=loopback_device_index,
+                frames_per_buffer=CHUNK
+
+                )
 
     frames = []
 
@@ -88,17 +123,34 @@ def audio_recording():
 
 #only appends audio chuinks if game is Active (not Paused)
     while recording:
-        data = stream.read(CHUNK)
+        mic_data = mic_stream.read(CHUNK)
+        team_data = team_stream.read(CHUNK)
         if game_active:
-            frames.append(data)
+                        # Convert the binary audio data to NumPy arrays
+            mic_array = np.frombuffer(mic_data, dtype=np.int16)
+            team_array = np.frombuffer(team_data, dtype=np.int16)
+
+            # Check if the arrays have the same length
+            if len(mic_array) == len(team_array):
+                # Mix the audio by adding the samples together
+                combined_audio = mic_array + team_array
+
+                # Convert the combined audio back to binary data
+                combined_data = combined_audio.tobytes()
+
+                frames.append(combined_data)
+            else:
+                print("Audio frame length mismatch. Skipping frame.")
         else:
             #skip frames when Active is False
             pass
 
     print("Recording stopped.")
 
-    stream.stop_stream()
-    stream.close()
+    mic_stream.stop_stream()
+    mic_stream.close()
+    team_stream.stop_stream()
+    team_stream.close()
     audio.terminate()
 
 #gametime recording started is added on as deadAudio for Syncing

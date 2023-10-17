@@ -3,9 +3,10 @@ import requests
 import urllib3
 import time
 import wave
-import pyaudio
+import pyaudiowpatch as pyaudio
 import numpy as np
-from game import live_game
+from game import LiveGame
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Recorder:
     def __init__(self):
@@ -18,6 +19,7 @@ class Recorder:
         self.RATE = 48000
         self.OUTPUT_FILENAME = "output.wav"
         self.audio = pyaudio.PyAudio()
+        self.game_time = None
 
         self.loopback_device_index = None
         for i in range(self.audio.get_device_count()):
@@ -28,6 +30,10 @@ class Recorder:
         if self.loopback_device_index is None:
             print("Default WASAPI loopback device not found. Please Make sure (Stereo Mix) is enabled in Control Panel / Input Devices.")
             exit(1)
+
+        self.game_time_thread = threading.Thread(target=self.poll_game_time)
+        self.game_time_thread.daemon = True  # Make the thread a daemon to exit with the main program
+        self.game_time_thread.start()
 
     def start_recording(self):
         while live_game.get_current_time() == "paused":
@@ -42,6 +48,11 @@ class Recorder:
 
     def stop_recording(self):
         self.recording = False
+
+    def poll_game_time(self):
+        while True:
+            self.game_time = live_game.get_current_time()
+            time.sleep(0.25)
     
     def audio_recording(self):
         frames = []
@@ -70,7 +81,7 @@ class Recorder:
             mic_data = mic_stream.read(self.CHUNK)
             team_data = team_stream.read(self.CHUNK)
 
-            if live_game.get_current_time() != "paused":
+            if self.game_time != "paused":
                 mic_array = np.frombuffer(mic_data, dtype=np.int16)
                 team_array = np.frombuffer(team_data, dtype=np.int16)
 
@@ -100,3 +111,15 @@ class Recorder:
         wf.setframerate(self.RATE)
         wf.writeframes(b''.join(frames))
         wf.close()
+
+      #Test Loop
+if __name__ == "__main__":
+    live_game = LiveGame()
+    recorder = Recorder()
+
+    recorder.start_recording()
+    
+    input("Press Enter to stop recording...")
+    recorder.stop_recording()
+    exit()
+exit();   

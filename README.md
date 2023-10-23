@@ -1,6 +1,6 @@
 # Team Communication Recorder and Synchronizer
 
-##COMING SOON
+## COMING SOON
 Miipah is a Full-Time Student and Still working on a Public Release. These are the Features Currently being Worked on:
 - GUI Interface and .exe installer
 - Stream Projector with audio routing for Discord Screen Share

@@ -2,10 +2,10 @@ import threading
 import requests
 import urllib3
 import time
-import wave
 import pyaudiowpatch as pyaudio
 import numpy as np
 from game import LiveGame
+from pydub import AudioSegment
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class Recorder:
@@ -105,14 +105,25 @@ class Recorder:
                 blank_frames = b'\x00' * (delay_frames * self.CHANNELS * 2)
                 frames = [blank_frames] + frames
 
-        wf = wave.open(self.OUTPUT_FILENAME, 'wb')
-        wf.setnchannels(self.CHANNELS)
-        wf.setsampwidth(self.audio.get_sample_size(self.FORMAT))
-        wf.setframerate(self.RATE)
-        wf.writeframes(b''.join(frames))
-        wf.close()
+        audio_data = b''.join(frames)
+        audio_segment = AudioSegment(
+            audio_data,
+            sample_width=self.audio.get_sample_size(self.FORMAT),
+            frame_rate=self.RATE,
+            channels=self.CHANNELS
+        )
+        
+        audio_segment.export(self.OUTPUT_FILENAME, format="mp3")
 
-      #Test Loop
+
+
+
+    
+
+
+#Test Loop
+
+
 if __name__ == "__main__":
     live_game = LiveGame()
     recorder = Recorder()
@@ -123,3 +134,4 @@ if __name__ == "__main__":
     recorder.stop_recording()
     exit()
 exit();   
+

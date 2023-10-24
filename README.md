@@ -1,12 +1,5 @@
 # Team Communication Recorder and Synchronizer
 
-## COMING SOON
-Miipah is a Full-Time Student and Still working on a Public Release. These are the Features Currently being Worked on:
-- GUI Interface and .exe installer
-- Stream Projector with audio routing for Discord Screen Share
-- Annotation Tools
-- Clipper for Saving Important Sections
-
 ## Overview
 
 The Team Communication Recorder and Synchronizer is a tool designed to record team communication during gameplay, intelligently skip over pauses, and synchronize it with ROFL replay file playback. This tool is particularly useful for pre-made teams, eSports players, and coaches who want to review their gameplay sessions with synchronized voice communication.

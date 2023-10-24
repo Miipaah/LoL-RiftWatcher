@@ -2,10 +2,10 @@ import sys
 import warnings
 from urllib3.exceptions import InsecureRequestWarning
 from PyQt5 import QtWidgets, QtCore
-import playback
 import replay
 import tkinter as tk
 from tkinter import filedialog
+import CommPlayer
 
 class DraggableWidget(QtWidgets.QWidget):
     def __init__(self):
@@ -60,12 +60,15 @@ def browse_file():
         # Update the 'file' variable with the selected file path
         global file
         file = file_path
+        audio.start_player(file)  # Start playing the selected file
 
 if __name__ == "__main__":
     warnings.simplefilter('ignore', InsecureRequestWarning)
     file = "select file"
     manager = replay.ReplayManager()
-    audio = playback.player(file)
+
+    audio = CommPlayer.Player()  # Create an instance of the Player class from your module
+
     app = QtWidgets.QApplication(sys.argv)
 
     window = DraggableWidget()

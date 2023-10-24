@@ -8,6 +8,8 @@ class ReplayManager:
         self.base_url = base_url
         self.endpoint = f"{self.base_url}/replay/playback"
         self.state = None
+        self.paused = False
+        self.time = 0.0
 
 
     def get_state(self):
@@ -40,4 +42,5 @@ class ReplayManager:
         response.raise_for_status()
         self.get_state()  # Update the local state after changing the server state
         return response.json()
+
 

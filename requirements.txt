@@ -2,8 +2,5 @@ threading
 requests
 urllib3
 time
-pygame
-numpy
-pydub
-pyaudiowatch
-pyside6
+pyaudio
+wave

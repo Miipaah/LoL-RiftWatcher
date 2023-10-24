@@ -1,4 +1,4 @@
-# Team Communication Recorder and Synchronizer
+(WIP) # Team Communication Recorder and Synchronizer
 
 ## Overview
 

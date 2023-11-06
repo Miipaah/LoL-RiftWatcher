@@ -77,7 +77,7 @@ class Game_Replay:
         response.raise_for_status()
         self.get_state()  # Update the local state after changing the server state
         return response.json()   
-class Audio_Input:
+class Audio_Recorder:
     def __init__(self):
         self.recording = False
         self.start_time = None
@@ -183,7 +183,7 @@ class Audio_Input:
         )
         
         audio_segment.export(self.OUTPUT_FILENAME, format="mp3")
-class Audio_Output:
+class Audio_Playback:
 
     
     def __init__(self):
@@ -210,5 +210,16 @@ class Audio_Output:
             if not self.paused:
                 pygame.mixer.music.pause()
                 self.paused = True
+class Synced_Playback:
+    def play_replay(audio,manager):
+        current_time = manager.get_current_time()
+        audio.play(current_time)
+        response = manager.play()
+        print(response)
 
+    def pause_replay(audio,manager):
+        audio.pause()
+        response = manager.pause()
+        print(response)
 
+Synced_Playback.play_replay()
